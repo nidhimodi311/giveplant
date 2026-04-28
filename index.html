@@ -1,0 +1,751 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sanseveria — Snake Plant Shop</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --sage: #4a7c59;
+    --sage-light: #c8ddd0;
+    --sage-pale: #eef5f1;
+    --sand: #f5f0e8;
+    --bark: #3d2e1e;
+    --bark-mid: #7a5c3c;
+    --cream: #fdf9f3;
+    --accent: #c5723e;
+    --accent-light: #f0dcc8;
+    --text: #1e1e1e;
+    --muted: #6b6560;
+    --border: #ddd6cc;
+    --white: #ffffff;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, .logo { font-family: 'Cormorant Garamond', serif; }
+
+  /* NAV */
+  nav {
+    background: var(--cream);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo { font-size: 1.6rem; font-weight: 600; color: var(--sage); letter-spacing: 0.04em; }
+  .logo span { color: var(--bark-mid); font-style: italic; font-weight: 300; }
+  .nav-right { display: flex; align-items: center; gap: 1rem; }
+  .cart-btn {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--sage); color: white;
+    border: none; padding: 8px 18px;
+    border-radius: 40px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500;
+    transition: background 0.2s;
+  }
+  .cart-btn:hover { background: var(--bark); }
+  .cart-count {
+    background: var(--accent); color: white;
+    border-radius: 50%; width: 20px; height: 20px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 600;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, var(--sage-pale) 0%, var(--sand) 100%);
+    padding: 5rem 2rem 4rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle at 20% 80%, var(--sage-light) 0%, transparent 50%),
+                      radial-gradient(circle at 80% 20%, var(--accent-light) 0%, transparent 50%);
+    opacity: 0.5;
+  }
+  .hero-content { position: relative; z-index: 1; }
+  .hero-eyebrow {
+    font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--sage); font-weight: 500; margin-bottom: 1rem;
+  }
+  .hero h1 {
+    font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 300; line-height: 1.15;
+    color: var(--bark); margin-bottom: 1.2rem;
+  }
+  .hero h1 em { color: var(--sage); font-style: italic; }
+  .hero p {
+    color: var(--muted); font-size: 1rem; max-width: 480px;
+    margin: 0 auto 2rem; line-height: 1.7;
+  }
+  .hero-badges { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .badge {
+    background: white; border: 1px solid var(--border);
+    border-radius: 40px; padding: 6px 16px;
+    font-size: 0.8rem; color: var(--muted);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--sage); }
+
+  /* FILTERS */
+  .filter-bar {
+    padding: 1.5rem 2rem;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+    background: var(--white);
+  }
+  .filter-label { font-size: 0.82rem; color: var(--muted); font-weight: 500; margin-right: 4px; }
+  .filter-btn {
+    border: 1px solid var(--border); background: white;
+    border-radius: 40px; padding: 6px 18px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.83rem;
+    cursor: pointer; color: var(--muted); transition: all 0.15s;
+  }
+  .filter-btn.active {
+    background: var(--sage); border-color: var(--sage);
+    color: white; font-weight: 500;
+  }
+  .filter-btn:hover:not(.active) { border-color: var(--sage); color: var(--sage); }
+
+  /* GRID */
+  .shop-section { padding: 2.5rem 2rem 4rem; }
+  .section-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 2rem; }
+  .section-header h2 { font-size: 1.8rem; font-weight: 400; color: var(--bark); }
+  .result-count { font-size: 0.85rem; color: var(--muted); }
+
+  .plant-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .plant-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+  }
+  .plant-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.08); }
+
+  .plant-img {
+    height: 220px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .plant-svg { width: 140px; height: 200px; }
+
+  .size-badge {
+    position: absolute; top: 12px; left: 12px;
+    background: var(--sage); color: white;
+    border-radius: 20px; padding: 3px 12px;
+    font-size: 0.72rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .size-badge.medium { background: var(--bark-mid); }
+  .size-badge.large { background: var(--bark); }
+
+  .plant-info { padding: 1.1rem 1.2rem; }
+  .plant-name { font-size: 1.15rem; font-weight: 600; color: var(--bark); margin-bottom: 2px; font-family: 'Cormorant Garamond', serif; }
+  .plant-variety { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.8rem; font-style: italic; }
+  .plant-traits { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+  .trait {
+    background: var(--sage-pale); color: var(--sage);
+    border-radius: 20px; padding: 2px 10px; font-size: 0.72rem; font-weight: 500;
+  }
+  .plant-footer { display: flex; align-items: center; justify-content: space-between; }
+  .plant-price { font-size: 1.3rem; font-weight: 600; color: var(--bark); font-family: 'Cormorant Garamond', serif; }
+  .plant-price span { font-size: 0.85rem; font-weight: 400; color: var(--muted); }
+
+  .add-btn {
+    background: var(--sage); color: white;
+    border: none; border-radius: 8px;
+    padding: 8px 16px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500;
+    transition: background 0.15s;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .add-btn:hover { background: var(--bark); }
+  .add-btn.added { background: var(--accent); }
+
+  /* CART PANEL */
+  .cart-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 200;
+  }
+  .cart-overlay.open { display: block; }
+  .cart-panel {
+    position: fixed; right: 0; top: 0; bottom: 0;
+    width: min(420px, 100vw);
+    background: var(--cream);
+    z-index: 201;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .cart-panel.open { transform: translateX(0); }
+
+  .cart-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    background: white;
+  }
+  .cart-header h2 { font-size: 1.4rem; font-weight: 400; color: var(--bark); }
+  .close-btn {
+    background: none; border: none; cursor: pointer;
+    font-size: 1.5rem; color: var(--muted); line-height: 1;
+  }
+
+  .cart-items { flex: 1; overflow-y: auto; padding: 1rem 1.5rem; }
+  .empty-cart { text-align: center; padding: 3rem 1rem; color: var(--muted); }
+  .empty-cart svg { margin-bottom: 1rem; opacity: 0.3; }
+
+  .cart-item {
+    background: white; border: 1px solid var(--border);
+    border-radius: 12px; padding: 1rem; margin-bottom: 10px;
+    display: flex; gap: 12px; align-items: center;
+  }
+  .cart-item-thumb {
+    width: 52px; height: 52px;
+    background: var(--sage-pale); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 1.6rem;
+  }
+  .cart-item-info { flex: 1; min-width: 0; }
+  .cart-item-name { font-size: 0.9rem; font-weight: 500; color: var(--bark); margin-bottom: 2px; }
+  .cart-item-size { font-size: 0.78rem; color: var(--muted); margin-bottom: 6px; }
+  .qty-controls { display: flex; align-items: center; gap: 8px; }
+  .qty-btn {
+    width: 24px; height: 24px; border-radius: 50%;
+    border: 1px solid var(--border); background: white;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem; color: var(--sage); font-weight: 600; transition: background 0.1s;
+  }
+  .qty-btn:hover { background: var(--sage-pale); }
+  .qty-num { font-size: 0.9rem; font-weight: 500; min-width: 20px; text-align: center; }
+  .cart-item-price { font-size: 1rem; font-weight: 600; color: var(--bark); font-family: 'Cormorant Garamond', serif; }
+  .remove-btn { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 1rem; padding: 4px; }
+  .remove-btn:hover { color: #c0392b; }
+
+  /* ORDER SUMMARY */
+  .order-summary {
+    padding: 1.2rem 1.5rem;
+    border-top: 1px solid var(--border);
+    background: white;
+  }
+  .summary-row {
+    display: flex; justify-content: space-between;
+    font-size: 0.88rem; color: var(--muted); margin-bottom: 8px;
+  }
+  .summary-row.total {
+    font-size: 1.1rem; font-weight: 600; color: var(--bark);
+    border-top: 1px solid var(--border); padding-top: 10px; margin-top: 4px;
+    font-family: 'Cormorant Garamond', serif;
+  }
+
+  .checkout-btn {
+    width: 100%; background: var(--sage); color: white;
+    border: none; border-radius: 12px; padding: 14px;
+    font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 500;
+    cursor: pointer; margin-top: 12px; transition: background 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .checkout-btn:hover { background: var(--bark); }
+
+  /* PAYMENT MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5); z-index: 300;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: white; border-radius: 20px;
+    width: min(520px, 95vw); max-height: 90vh; overflow-y: auto;
+    padding: 2rem;
+  }
+  .modal-header { display: flex; justify-content: space-between; margin-bottom: 1.5rem; }
+  .modal-header h2 { font-size: 1.6rem; font-weight: 400; color: var(--bark); }
+
+  .pay-methods { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.5rem; }
+  .pay-method {
+    border: 1.5px solid var(--border); border-radius: 12px;
+    padding: 14px 12px; cursor: pointer; text-align: center;
+    transition: border-color 0.15s, background 0.15s;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .pay-method:hover { border-color: var(--sage); }
+  .pay-method.selected { border-color: var(--sage); background: var(--sage-pale); }
+  .pay-method-icon { font-size: 1.5rem; }
+  .pay-method-label { font-size: 0.82rem; font-weight: 500; color: var(--bark); }
+  .pay-method-sub { font-size: 0.72rem; color: var(--muted); }
+
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { display: block; font-size: 0.82rem; font-weight: 500; color: var(--muted); margin-bottom: 5px; }
+  .form-group input, .form-group select {
+    width: 100%; border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 12px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--text);
+    background: white; outline: none; transition: border-color 0.15s;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: var(--sage); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .upi-section { text-align: center; padding: 1.5rem; background: var(--sage-pale); border-radius: 12px; margin-bottom: 1rem; }
+  .upi-id { font-size: 1.1rem; font-weight: 500; color: var(--sage); }
+
+  .cod-section { text-align: center; padding: 1.5rem; background: var(--accent-light); border-radius: 12px; margin-bottom: 1rem; }
+  .cod-section p { color: var(--bark-mid); font-size: 0.9rem; }
+
+  .place-order-btn {
+    width: 100%; background: var(--sage); color: white;
+    border: none; border-radius: 12px; padding: 14px;
+    font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 500;
+    cursor: pointer; transition: background 0.2s; margin-top: 0.5rem;
+  }
+  .place-order-btn:hover { background: var(--bark); }
+
+  /* SUCCESS */
+  .success-screen { text-align: center; padding: 2rem; }
+  .success-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+  .success-screen h2 { font-size: 1.8rem; font-weight: 400; color: var(--sage); margin-bottom: 0.5rem; }
+  .success-screen p { color: var(--muted); margin-bottom: 1.5rem; }
+  .order-number { font-size: 0.82rem; background: var(--sage-pale); border-radius: 8px; padding: 8px 16px; display: inline-block; color: var(--sage); font-weight: 500; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Sanseveria<span> Plants</span></div>
+  <div class="nav-right">
+    <button class="cart-btn" onclick="toggleCart()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      Cart <span class="cart-count" id="cartCount">0</span>
+    </button>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-content">
+    <p class="hero-eyebrow">Curated Decorative Plants</p>
+    <h1>The Art of<br><em>Snake Plants</em></h1>
+    <p>Architectural beauty meets effortless care. Each plant hand-selected for form and character.</p>
+    <div class="hero-badges">
+      <div class="badge"><div class="badge-dot"></div> Air Purifying</div>
+      <div class="badge"><div class="badge-dot"></div> Low Maintenance</div>
+      <div class="badge"><div class="badge-dot"></div> Pet-Friendly Options</div>
+      <div class="badge"><div class="badge-dot"></div> Free Delivery ₹999+</div>
+    </div>
+  </div>
+</section>
+
+<div class="filter-bar">
+  <span class="filter-label">Filter by size:</span>
+  <button class="filter-btn active" onclick="filterPlants('all', this)">All</button>
+  <button class="filter-btn" onclick="filterPlants('small', this)">Small</button>
+  <button class="filter-btn" onclick="filterPlants('medium', this)">Medium</button>
+  <button class="filter-btn" onclick="filterPlants('large', this)">Large</button>
+</div>
+
+<section class="shop-section">
+  <div class="section-header">
+    <h2>Our Collection</h2>
+    <span class="result-count" id="resultCount">6 plants</span>
+  </div>
+  <div class="plant-grid" id="plantGrid"></div>
+</section>
+
+<!-- Cart Overlay -->
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+<div class="cart-panel" id="cartPanel">
+  <div class="cart-header">
+    <h2>Your Cart</h2>
+    <button class="close-btn" onclick="toggleCart()">×</button>
+  </div>
+  <div class="cart-items" id="cartItems">
+    <div class="empty-cart">
+      <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      <p>Your cart is empty</p>
+    </div>
+  </div>
+  <div class="order-summary" id="orderSummary" style="display:none;">
+    <div class="summary-row"><span>Subtotal</span><span id="subtotal">₹0</span></div>
+    <div class="summary-row"><span>Delivery</span><span id="delivery">₹0</span></div>
+    <div class="summary-row total"><span>Total</span><span id="total">₹0</span></div>
+    <button class="checkout-btn" onclick="openPayment()">Proceed to Checkout →</button>
+  </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal-overlay" id="paymentModal">
+  <div class="modal" id="modalContent">
+    <div id="paymentView">
+      <div class="modal-header">
+        <h2>Checkout</h2>
+        <button class="close-btn" onclick="closePayment()">×</button>
+      </div>
+
+      <div class="pay-methods">
+        <div class="pay-method selected" onclick="selectPayment('card', this)">
+          <div class="pay-method-icon">💳</div>
+          <div class="pay-method-label">Card</div>
+          <div class="pay-method-sub">Visa, Mastercard</div>
+        </div>
+        <div class="pay-method" onclick="selectPayment('upi', this)">
+          <div class="pay-method-icon">📱</div>
+          <div class="pay-method-label">UPI</div>
+          <div class="pay-method-sub">GPay, PhonePe</div>
+        </div>
+        <div class="pay-method" onclick="selectPayment('netbanking', this)">
+          <div class="pay-method-icon">🏦</div>
+          <div class="pay-method-label">Net Banking</div>
+          <div class="pay-method-sub">All banks</div>
+        </div>
+        <div class="pay-method" onclick="selectPayment('cod', this)">
+          <div class="pay-method-icon">💵</div>
+          <div class="pay-method-label">Cash on Delivery</div>
+          <div class="pay-method-sub">Pay at door</div>
+        </div>
+      </div>
+
+      <div id="cardFields">
+        <div class="form-group">
+          <label>Cardholder Name</label>
+          <input type="text" placeholder="Name on card">
+        </div>
+        <div class="form-group">
+          <label>Card Number</label>
+          <input type="text" placeholder="1234 5678 9012 3456" maxlength="19">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Expiry</label>
+            <input type="text" placeholder="MM / YY">
+          </div>
+          <div class="form-group">
+            <label>CVV</label>
+            <input type="text" placeholder="123" maxlength="3">
+          </div>
+        </div>
+      </div>
+
+      <div id="upiFields" style="display:none;">
+        <div class="upi-section">
+          <p style="font-size:0.82rem;color:#6b6560;margin-bottom:6px;">Send payment to UPI ID</p>
+          <div class="upi-id">sanseveria@upi</div>
+          <p style="font-size:0.78rem;color:#6b6560;margin-top:8px;">Or enter your UPI ID below</p>
+        </div>
+        <div class="form-group">
+          <label>Your UPI ID</label>
+          <input type="text" placeholder="yourname@bank">
+        </div>
+      </div>
+
+      <div id="netbankingFields" style="display:none;">
+        <div class="form-group">
+          <label>Select Bank</label>
+          <select>
+            <option>State Bank of India</option>
+            <option>HDFC Bank</option>
+            <option>ICICI Bank</option>
+            <option>Axis Bank</option>
+            <option>Kotak Mahindra Bank</option>
+            <option>Punjab National Bank</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="codFields" style="display:none;">
+        <div class="cod-section">
+          <div style="font-size:1.5rem;margin-bottom:8px;">🏠</div>
+          <p>Pay in cash when your plants arrive at your doorstep. No extra charges.</p>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Delivery Address</label>
+        <input type="text" placeholder="Street address, apartment">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>City</label>
+          <input type="text" placeholder="City">
+        </div>
+        <div class="form-group">
+          <label>PIN Code</label>
+          <input type="text" placeholder="123456">
+        </div>
+      </div>
+
+      <div style="background:var(--sage-pale);border-radius:10px;padding:12px 14px;margin:10px 0;font-size:0.85rem;color:var(--sage);">
+        🌿 Order Total: <strong id="payTotal">₹0</strong>
+      </div>
+
+      <button class="place-order-btn" onclick="placeOrder()">Place Order →</button>
+    </div>
+
+    <div id="successView" style="display:none;" class="success-screen">
+      <div class="success-icon">🌿</div>
+      <h2>Order Confirmed!</h2>
+      <p>Your snake plants are being carefully packed and will be delivered soon.</p>
+      <div class="order-number" id="orderNum">Order #SNP-00000</div>
+      <br><br>
+      <button class="place-order-btn" onclick="resetOrder()" style="max-width:200px;margin:0 auto;">Continue Shopping</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PLANTS = [
+  {
+    id: 1, name: "Laurentii Gold", variety: "Sansevieria trifasciata 'Laurentii'",
+    size: "small", price: 399,
+    traits: ["Air Purifier", "Drought Tolerant"],
+    bg: "#eef5f1",
+    emoji: "🌿",
+    desc: "Compact with golden edges",
+    svgColor: "#4a7c59", stripeColor: "#f0c060"
+  },
+  {
+    id: 2, name: "Moonshine", variety: "Sansevieria trifasciata 'Moonshine'",
+    size: "small", price: 449,
+    traits: ["Low Light", "Air Purifier"],
+    bg: "#f0f4f0",
+    emoji: "🪴",
+    desc: "Silvery-green broad leaves",
+    svgColor: "#7aab8a", stripeColor: "#c8ddd0"
+  },
+  {
+    id: 3, name: "Black Coral", variety: "Sansevieria trifasciata 'Black Coral'",
+    size: "medium", price: 699,
+    traits: ["Statement Plant", "NASA Approved"],
+    bg: "#f5f0e8",
+    emoji: "🌱",
+    desc: "Dark dramatic foliage",
+    svgColor: "#2d4a35", stripeColor: "#4a7c59"
+  },
+  {
+    id: 4, name: "Cylindrica", variety: "Sansevieria cylindrica",
+    size: "medium", price: 799,
+    traits: ["Unique Form", "Low Maintenance"],
+    bg: "#eef5f1",
+    emoji: "🎋",
+    desc: "Round architectural spears",
+    svgColor: "#5a8c68", stripeColor: "#a8c8a8"
+  },
+  {
+    id: 5, name: "Zeylanica Giant", variety: "Sansevieria zeylanica",
+    size: "large", price: 1199,
+    traits: ["Floor Plant", "Statement Piece"],
+    bg: "#f0f5f0",
+    emoji: "🌴",
+    desc: "Bold striped statement plant",
+    svgColor: "#3d6645", stripeColor: "#8ab898"
+  },
+  {
+    id: 6, name: "Whale Fin", variety: "Sansevieria masoniana",
+    size: "large", price: 1499,
+    traits: ["Rare Variety", "Collector's Plant"],
+    bg: "#fdf5ee",
+    emoji: "🐋",
+    desc: "Massive paddle-shaped leaves",
+    svgColor: "#4a7858", stripeColor: "#c0d8b8"
+  }
+];
+
+let cart = {};
+let currentFilter = 'all';
+let paymentMethod = 'card';
+
+function getFilteredPlants() {
+  return currentFilter === 'all' ? PLANTS : PLANTS.filter(p => p.size === currentFilter);
+}
+
+function plantSVG(plant) {
+  const c = plant.svgColor;
+  const s = plant.stripeColor;
+  if (plant.size === 'small') {
+    return `<svg viewBox="0 0 100 160" class="plant-svg"><rect x="45" y="140" width="10" height="15" rx="3" fill="#8B6340"/><rect x="40" y="135" width="20" height="8" rx="3" fill="#6B4C2A"/>
+    <rect x="38" y="70" width="24" height="70" rx="8" fill="${c}"/><rect x="44" y="74" width="4" height="60" rx="2" fill="${s}" opacity="0.5"/>
+    <rect x="20" y="85" width="18" height="55" rx="7" fill="${c}" transform="rotate(-12,29,112)"/><rect x="24" y="89" width="3" height="46" rx="2" fill="${s}" opacity="0.5" transform="rotate(-12,29,112)"/>
+    <rect x="62" y="85" width="18" height="55" rx="7" fill="${c}" transform="rotate(12,71,112)"/><rect x="66" y="89" width="3" height="46" rx="2" fill="${s}" opacity="0.5" transform="rotate(12,71,112)"/>
+    </svg>`;
+  } else if (plant.size === 'medium') {
+    return `<svg viewBox="0 0 100 180" class="plant-svg"><rect x="44" y="160" width="12" height="18" rx="3" fill="#8B6340"/><rect x="38" y="153" width="24" height="10" rx="4" fill="#6B4C2A"/>
+    <rect x="36" y="60" width="28" height="98" rx="9" fill="${c}"/><rect x="43" y="65" width="5" height="85" rx="2" fill="${s}" opacity="0.5"/>
+    <rect x="14" y="80" width="22" height="78" rx="8" fill="${c}" transform="rotate(-15,25,119)"/><rect x="18" y="85" width="4" height="65" rx="2" fill="${s}" opacity="0.5" transform="rotate(-15,25,119)"/>
+    <rect x="64" y="80" width="22" height="78" rx="8" fill="${c}" transform="rotate(15,75,119)"/><rect x="68" y="85" width="4" height="65" rx="2" fill="${s}" opacity="0.5" transform="rotate(15,75,119)"/>
+    <rect x="4" y="95" width="18" height="65" rx="7" fill="${c}" transform="rotate(-25,13,127)"/><rect x="68" y="100" width="24" height="65" rx="7" fill="${c}" transform="rotate(25,80,132)"/>
+    </svg>`;
+  } else {
+    return `<svg viewBox="0 0 110 200" class="plant-svg"><rect x="48" y="178" width="14" height="20" rx="3" fill="#8B6340"/><rect x="40" y="170" width="30" height="12" rx="4" fill="#6B4C2A"/>
+    <rect x="38" y="50" width="34" height="125" rx="10" fill="${c}"/><rect x="46" y="55" width="6" height="112" rx="3" fill="${s}" opacity="0.5"/>
+    <rect x="10" y="70" width="26" height="105" rx="9" fill="${c}" transform="rotate(-18,23,122)"/><rect x="15" y="75" width="5" height="90" rx="2" fill="${s}" opacity="0.5" transform="rotate(-18,23,122)"/>
+    <rect x="74" y="70" width="26" height="105" rx="9" fill="${c}" transform="rotate(18,87,122)"/><rect x="78" y="75" width="5" height="90" rx="2" fill="${s}" opacity="0.5" transform="rotate(18,87,122)"/>
+    <rect x="0" y="90" width="20" height="90" rx="7" fill="${c}" transform="rotate(-28,10,135)"/>
+    <rect x="90" y="90" width="20" height="90" rx="7" fill="${c}" transform="rotate(28,100,135)"/>
+    </svg>`;
+  }
+}
+
+function renderGrid() {
+  const plants = getFilteredPlants();
+  const grid = document.getElementById('plantGrid');
+  document.getElementById('resultCount').textContent = `${plants.length} plant${plants.length !== 1 ? 's' : ''}`;
+  grid.innerHTML = plants.map(p => {
+    const inCart = cart[p.id] ? cart[p.id].qty : 0;
+    return `<div class="plant-card">
+      <div class="plant-img" style="background:${p.bg}">
+        ${plantSVG(p)}
+        <div class="size-badge ${p.size}">${p.size.charAt(0).toUpperCase()+p.size.slice(1)}</div>
+      </div>
+      <div class="plant-info">
+        <div class="plant-name">${p.name}</div>
+        <div class="plant-variety">${p.variety}</div>
+        <div class="plant-traits">${p.traits.map(t => `<span class="trait">${t}</span>`).join('')}</div>
+        <div class="plant-footer">
+          <div class="plant-price">₹${p.price.toLocaleString()} <span>/ plant</span></div>
+          <button class="add-btn ${inCart > 0 ? 'added' : ''}" onclick="addToCart(${p.id})">
+            ${inCart > 0 ? `✓ In Cart (${inCart})` : '+ Add'}
+          </button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterPlants(size, btn) {
+  currentFilter = size;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGrid();
+}
+
+function addToCart(id) {
+  const plant = PLANTS.find(p => p.id === id);
+  if (!cart[id]) cart[id] = { ...plant, qty: 0 };
+  cart[id].qty++;
+  updateCartUI();
+  renderGrid();
+}
+
+function changeQty(id, delta) {
+  if (!cart[id]) return;
+  cart[id].qty += delta;
+  if (cart[id].qty <= 0) delete cart[id];
+  updateCartUI();
+  renderGrid();
+}
+
+function removeItem(id) {
+  delete cart[id];
+  updateCartUI();
+  renderGrid();
+}
+
+function updateCartUI() {
+  const items = Object.values(cart);
+  const total = items.reduce((s, i) => s + i.price * i.qty, 0);
+  const count = items.reduce((s, i) => s + i.qty, 0);
+  document.getElementById('cartCount').textContent = count;
+
+  const cartItemsEl = document.getElementById('cartItems');
+  const summaryEl = document.getElementById('orderSummary');
+
+  if (items.length === 0) {
+    cartItemsEl.innerHTML = `<div class="empty-cart"><svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg><p>Your cart is empty</p></div>`;
+    summaryEl.style.display = 'none';
+  } else {
+    cartItemsEl.innerHTML = items.map(item => `
+      <div class="cart-item">
+        <div class="cart-item-thumb">${item.emoji}</div>
+        <div class="cart-item-info">
+          <div class="cart-item-name">${item.name}</div>
+          <div class="cart-item-size">${item.size.charAt(0).toUpperCase()+item.size.slice(1)} · ${item.variety.split(' ')[0]}</div>
+          <div class="qty-controls">
+            <button class="qty-btn" onclick="changeQty(${item.id}, -1)">−</button>
+            <span class="qty-num">${item.qty}</span>
+            <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+          <div class="cart-item-price">₹${(item.price * item.qty).toLocaleString()}</div>
+          <button class="remove-btn" onclick="removeItem(${item.id})" title="Remove">🗑</button>
+        </div>
+      </div>
+    `).join('');
+
+    const delivery = total >= 999 ? 0 : 99;
+    document.getElementById('subtotal').textContent = `₹${total.toLocaleString()}`;
+    document.getElementById('delivery').textContent = delivery === 0 ? 'Free' : `₹${delivery}`;
+    document.getElementById('total').textContent = `₹${(total + delivery).toLocaleString()}`;
+    document.getElementById('payTotal').textContent = `₹${(total + delivery).toLocaleString()}`;
+    summaryEl.style.display = 'block';
+  }
+}
+
+function toggleCart() {
+  document.getElementById('cartPanel').classList.toggle('open');
+  document.getElementById('cartOverlay').classList.toggle('open');
+}
+
+function openPayment() {
+  toggleCart();
+  document.getElementById('paymentModal').classList.add('open');
+  document.getElementById('paymentView').style.display = '';
+  document.getElementById('successView').style.display = 'none';
+}
+
+function closePayment() {
+  document.getElementById('paymentModal').classList.remove('open');
+}
+
+function selectPayment(method, el) {
+  paymentMethod = method;
+  document.querySelectorAll('.pay-method').forEach(m => m.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('cardFields').style.display = method === 'card' ? '' : 'none';
+  document.getElementById('upiFields').style.display = method === 'upi' ? '' : 'none';
+  document.getElementById('netbankingFields').style.display = method === 'netbanking' ? '' : 'none';
+  document.getElementById('codFields').style.display = method === 'cod' ? '' : 'none';
+}
+
+function placeOrder() {
+  const orderId = 'SNP-' + Math.floor(10000 + Math.random() * 90000);
+  document.getElementById('orderNum').textContent = `Order #${orderId}`;
+  document.getElementById('paymentView').style.display = 'none';
+  document.getElementById('successView').style.display = 'block';
+  cart = {};
+  updateCartUI();
+  renderGrid();
+}
+
+function resetOrder() {
+  closePayment();
+}
+
+renderGrid();
+</script>
+</body>
+</html>
